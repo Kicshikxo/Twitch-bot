@@ -7,6 +7,7 @@ export const createDocument = (app: INestApplication) => {
         .setTitle('Kicshikxo Twitch bot API')
         .setDescription('<a href="https://github.com/Kicshikxo/Twitch-bot#readme" target="_blank"><b>Документация</b></a>')
         .setVersion('')
+        .addBearerAuth()
         .build()
 
     const document = SwaggerModule.createDocument(app, options, {
