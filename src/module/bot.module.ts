@@ -1,14 +1,16 @@
+import { HttpModule } from '@nestjs/axios'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { BotController } from './bot.controller'
 import { BotService } from './bot.service'
 import { ChannelsController } from './channels/channels.controller'
 import { ChannelsService } from './channels/channels.service'
+import { CommandsController } from './commands/commands.controller'
+import { CommandsService } from './commands/commands.service'
 import { PrismaService } from './prisma/prisma.service'
 
 @Module({
-    imports: [],
-    controllers: [BotController, ChannelsController],
-    providers: [BotService, ChannelsService, PrismaService, ConfigService]
+    imports: [HttpModule],
+    controllers: [ChannelsController, CommandsController],
+    providers: [BotService, ChannelsService, CommandsService, PrismaService, ConfigService]
 })
 export class BotModule {}
