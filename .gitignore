@@ -38,4 +38,4 @@ lerna-debug.log*
 .env
 
 # Prisma client
-src/bot/prisma/client
+src/module/prisma/client

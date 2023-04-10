@@ -5,7 +5,7 @@
     "compilerOptions": {
         "assets": [
             {
-                "include": "bot/prisma/client",
+                "include": "module/prisma/client",
                 "watchAssets": true
             }
         ],
