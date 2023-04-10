@@ -1,11 +1,16 @@
 import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ChatUserstate, Client } from 'tmi.js'
+import tmi, { ChatUserstate, Client } from 'tmi.js-reply-fork'
+import { CommandsService } from './commands/commands.service'
 import { PrismaService } from './prisma/prisma.service'
 
 @Injectable()
 export class BotService implements OnModuleInit {
-    constructor(private readonly prismaService: PrismaService, private readonly configService: ConfigService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly configService: ConfigService,
+        private readonly commandsService: CommandsService
+    ) {}
 
     private client: Client
 
@@ -13,11 +18,10 @@ export class BotService implements OnModuleInit {
         await this.initClient()
         await this.connectClient()
         this.client.on('message', this.messageHandler.bind(this))
+        this.client.on('join', this.joinHandler.bind(this))
     }
 
     private async initClient() {
-        const tmi = await import('tmi.js')
-
         this.client = new tmi.Client({
             options: {
                 debug: true
@@ -34,19 +38,34 @@ export class BotService implements OnModuleInit {
         this.client.connect()
     }
 
+    private async joinHandler(channel: string, username: string, self: boolean) {
+        if (self) this.client.say(channel, 'peepoHey')
+    }
+
     private async messageHandler(channel: string, userstate: ChatUserstate, message: string, self: boolean) {
         if (self || !message.startsWith('!')) return
 
-        const [command, ...args] = message
-            .slice(1)
-            .split(' ')
-            .filter((part) => part.trim())
+        const [command, ...args] = JSON.parse(JSON.stringify(message.trim())).slice(1).split(' ')
 
-        console.log(command, args)
-        console.log(userstate)
-
-        if (command === 'тест') {
-            this.client.say(channel, `Тест: ${args}`)
+        if (command === 'ask') {
+            return this.client.reply(channel, this.commandsService.ask({ question: args.join(' ') }), userstate)
+        }
+        if (command === 'choice') {
+            return this.client.reply(channel, this.commandsService.choice({ options: args }), userstate)
+        }
+        if (command === 'calc') {
+            return this.client.reply(channel, this.commandsService.calc({ expression: args.join(' ') }), userstate)
+        }
+        if (command === 'gpt') {
+            this.client.reply(channel, 'Думаю...', userstate)
+            const response = await this.commandsService.gpt({
+                question: args.join(' '),
+                key: this.configService.get('OPENAI_API_KEY') ?? ''
+            })
+            for (const part of response.match(/(?=.{500})(.{1,500})\s/gu) ?? []) {
+                this.client.reply(channel, part, userstate)
+            }
+            return
         }
     }
 }
