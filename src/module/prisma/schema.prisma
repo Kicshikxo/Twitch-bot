@@ -8,10 +8,25 @@ datasource db {
     url      = env("TWITCH_BOT_DATABASE_URL")
 }
 
+model User {
+    id       String   @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+    name     String   @unique @map("user_name")
+    password String   @map("password") @db.Char(60)
+    channel  Channel?
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+    @@map("users")
+}
+
 model Channel {
-    id        String   @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
-    name      String   @unique @map("channel_name")
-    disabled  Boolean  @default(false) @map("disabled")
+    id       String  @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
+    user     User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    userId   String  @unique @map("user_id") @db.Uuid
+    name     String  @unique @map("channel_name")
+    disabled Boolean @default(false) @map("disabled")
+
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
