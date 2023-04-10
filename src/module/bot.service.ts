@@ -62,7 +62,7 @@ export class BotService implements OnModuleInit {
                 question: args.join(' '),
                 key: this.configService.get('OPENAI_API_KEY') ?? ''
             })
-            for (const part of response.match(/(?=.{500})(.{1,500})\s/gu) ?? []) {
+            for (const part of response.match(/([\s\S]{1,500}(\s|$))\s*/g) ?? []) {
                 this.client.reply(channel, part, userstate)
             }
             return
