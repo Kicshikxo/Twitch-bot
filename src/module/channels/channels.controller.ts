@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Post } from '@nestjs/common'
 import {
     ApiBadRequestResponse,
     ApiBody,
+    ApiConsumes,
     ApiCreatedResponse,
     ApiInternalServerErrorResponse,
     ApiOkResponse,
@@ -9,8 +10,6 @@ import {
     ApiTags
 } from '@nestjs/swagger'
 import { ChannelsService } from './channels.service'
-import { CreateChannelRequest } from './dto/CreateChannelRequest.dto'
-import { DeleteChannelRequest } from './dto/DeleteChannelRequest.dto'
 
 @ApiTags('Каналы')
 @Controller('channels')
@@ -40,13 +39,23 @@ export class ChannelsController {
         },
         description: 'Ошибка: ошибка добавления канала'
     })
+    @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
-        description: 'Название канала',
-        type: CreateChannelRequest,
+        schema: {
+            type: 'object',
+            properties: {
+                channelName: {
+                    type: 'string',
+                    description: 'Название канала',
+                    example: 'example_channel'
+                }
+            },
+            required: ['channelName']
+        },
         required: true
     })
-    createChannel(@Body() createChannelData: CreateChannelRequest) {
-        return this.channelsService.createChannel(createChannelData.channelName)
+    createChannel(@Body('channelName') channelName: string) {
+        return this.channelsService.createChannel(channelName)
     }
 
     @Delete('/delete')
@@ -72,12 +81,23 @@ export class ChannelsController {
         },
         description: 'Ошибка: ошибка удаления канала'
     })
+    @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
         description: 'Название канала',
-        type: DeleteChannelRequest,
+        schema: {
+            type: 'object',
+            properties: {
+                channelName: {
+                    type: 'string',
+                    description: 'Название канала',
+                    example: 'example_channel'
+                }
+            },
+            required: ['channelName']
+        },
         required: true
     })
-    deleteChannel(@Body() deleteChannelData: DeleteChannelRequest) {
-        return this.channelsService.deleteChannel(deleteChannelData.channelName)
+    deleteChannel(@Body('channelName') channelName: string) {
+        return this.channelsService.deleteChannel(channelName)
     }
 }
