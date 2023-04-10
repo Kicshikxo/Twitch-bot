@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Post } from '@nestjs/common'
 import {
     ApiBadRequestResponse,
+    ApiBearerAuth,
     ApiBody,
     ApiConsumes,
     ApiCreatedResponse,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/swagger'
 import { ChannelsService } from './channels.service'
 
+@ApiBearerAuth()
 @ApiTags('Каналы')
 @Controller('channels')
 export class ChannelsController {
