@@ -6,7 +6,7 @@ export class ChannelsService {
     constructor(private readonly prismaService: PrismaService) {}
 
     async createChannel(channelName: string) {
-        return await this.prismaService.channel.create({ data: { name: channelName.toLowerCase() } })
+        // return await this.prismaService.channel.create({ data: { name: channelName.toLowerCase() } })
     }
 
     async deleteChannel(channelName: string) {
