@@ -125,6 +125,7 @@ export class CommandsService {
             })
             return response.data.choices.at(0)?.message?.content ?? ''
         } catch (e) {
+            console.error(e)
             return `Ошибка: ${e.response?.data?.error?.message ?? e.message}`
         }
     }
