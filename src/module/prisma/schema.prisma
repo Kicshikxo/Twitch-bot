@@ -60,6 +60,8 @@ model ChatHistoryMessage {
 
 enum SettingType {
     OPEN_AI_AUTH_TOKEN
+    STREAM_DJ_CHANNEL_ID
+    STREAM_DJ_LINK
 }
 
 enum ChatRole {

@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios'
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import isUrl from 'is-url'
 import { Configuration, OpenAIApi } from 'openai'
@@ -133,14 +133,14 @@ export class CommandsService {
             }
         }
         if (['add'].includes(options.command)) {
-            if (!options.query) throw new BadRequestException('Не указано название трека или ютуб ссылка')
+            if (!options.query?.trim()) return 'Не указано название трека или ютуб ссылка'
 
             const videoLink = isUrl(options.query)
                 ? options.query
                 : ((await youtubeSearch(`${options.query} Official Music Video`, { limit: 1 })).items.at(0) as Video).url
 
             const { data: response } = await this.httpService.axiosRef.post(
-                `https://streamdj.app/includes/back.php?func=add_track&channel=99840`,
+                `https://streamdj.app/includes/back.php?func=add_track&channel=${options.channelId}`,
                 querystring.stringify({
                     url: videoLink,
                     author: options.nickname ?? this.configService.get('TWITCH_BOT_USERNAME') ?? 'unknown'

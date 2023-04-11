@@ -94,7 +94,31 @@ export class BotService implements OnModuleInit {
                 data: { channel: channel, value: args.join(' '), userstate: userstate, status: MessageStatus.QUEUED }
             })
 
-            this.gptHandler(channel)
+            return this.gptHandler(channel)
+        }
+        if (command === 'dj') {
+            const channelId = await this.prismaService.settings.findFirst({
+                where: { channel: { name: channel.slice(1) }, type: SettingType.STREAM_DJ_CHANNEL_ID }
+            })
+            if (!channelId) {
+                return this.client.reply(channel, 'Для этого канала не указан Stream DJ ID', userstate)
+            }
+
+            const djLink = await this.prismaService.settings.findFirst({
+                where: { channel: { name: channel.slice(1) }, type: SettingType.STREAM_DJ_LINK }
+            })
+
+            return this.client.reply(
+                channel,
+                await this.commandsService.dj({
+                    channelId: channelId?.value,
+                    command: args.at(0),
+                    query: args.slice(1).join(' '),
+                    nickname: userstate.username,
+                    djLink: djLink?.value
+                }),
+                userstate
+            )
         }
     }
 
