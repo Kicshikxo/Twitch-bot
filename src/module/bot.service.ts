@@ -101,7 +101,7 @@ export class BotService implements OnModuleInit {
                 where: { channel: { name: channel.slice(1) }, type: SettingType.STREAM_DJ_CHANNEL_ID }
             })
             if (!channelId) {
-                return this.client.reply(channel, 'Для этого канала не указан Stream DJ ID', userstate)
+                return this.client.reply(channel, 'Для этого канала не указан ID канала на StreamDJ', userstate)
             }
 
             const djLink = await this.prismaService.settings.findFirst({
