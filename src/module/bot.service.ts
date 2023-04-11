@@ -30,7 +30,7 @@ export class BotService implements OnModuleInit {
                 username: this.configService.get('TWITCH_BOT_USERNAME'),
                 password: this.configService.get('TWITCH_BOT_OAUTH_TOKEN')
             },
-            channels: (await this.prismaService.channel.findMany({ where: { disabled: false } })).map((channel) => channel.name)
+            channels: (await this.prismaService.channel.findMany({ where: { enabled: true } })).map((channel) => channel.name)
         })
     }
 
@@ -39,7 +39,7 @@ export class BotService implements OnModuleInit {
     }
 
     private async joinHandler(channel: string, username: string, self: boolean) {
-        if (self) this.client.say(channel, 'peepoHey')
+        if (self && this.configService.get('NODE_ENV') === 'production') this.client.say(channel, 'peepoHey')
     }
 
     private async messageHandler(channel: string, userstate: ChatUserstate, message: string, self: boolean) {
