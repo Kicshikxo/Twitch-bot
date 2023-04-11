@@ -18,7 +18,7 @@ export class AuthService {
     }
 
     async login(options: { login: string; password: string }) {
-        const user = await this.prismaService.user.findUnique({ where: { name: options.login } })
+        const user = await this.prismaService.channel.findUnique({ where: { name: options.login } })
 
         if (user && compareSync(options.password, user?.password)) {
             return this.jwtService.sign({

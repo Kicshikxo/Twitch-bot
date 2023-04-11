@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import tmi, { ChatUserstate, Client } from 'tmi.js-reply-fork'
 import { CommandsService } from './commands/commands.service'
+import { MessageStatus, SettingType } from './prisma/client'
 import { PrismaService } from './prisma/prisma.service'
 
 @Injectable()
@@ -40,6 +41,11 @@ export class BotService implements OnModuleInit {
 
     private async joinHandler(channel: string, username: string, self: boolean) {
         if (self && this.configService.get('NODE_ENV') === 'production') this.client.say(channel, 'peepoHey')
+        await this.prismaService.chatQueue.updateMany({
+            where: { status: MessageStatus.IN_PROGRESS },
+            data: { status: MessageStatus.FINISHED }
+        })
+        this.gptHandler(channel)
     }
 
     private async messageHandler(channel: string, userstate: ChatUserstate, message: string, self: boolean) {
@@ -57,15 +63,79 @@ export class BotService implements OnModuleInit {
             return this.client.reply(channel, this.commandsService.calc({ expression: args.join(' ') }), userstate)
         }
         if (command === 'gpt') {
-            this.client.reply(channel, 'Думаю...', userstate)
-            const response = await this.commandsService.gpt({
-                question: args.join(' '),
-                key: this.configService.get('OPENAI_API_KEY') ?? ''
-            })
-            for (const part of response.match(/([\s\S]{1,500}(\s|$))\s*/g) ?? []) {
-                this.client.reply(channel, part, userstate)
+            if (args.at(0) === 'clear' && userstate.username) {
+                return this.client.reply(
+                    channel,
+                    await this.commandsService.gptClearHistory({ channel: channel, username: userstate.username }),
+                    userstate
+                )
             }
+
+            const userQueueLength = await this.prismaService.chatQueue.count({
+                where: {
+                    channel: channel,
+                    userstate: { path: ['username'], string_contains: userstate.username },
+                    status: { not: MessageStatus.FINISHED }
+                }
+            })
+            if (userQueueLength >= 3) {
+                this.gptHandler(channel)
+                return this.client.reply(channel, 'Вы задаёте слишком много вопросов!', userstate)
+            }
+
+            const queueLength = await this.prismaService.chatQueue.count({
+                where: { channel: channel, status: { not: MessageStatus.FINISHED } }
+            })
+            if (queueLength > 0) {
+                this.client.reply(channel, 'Ваш вопрос добавлен в очередь', userstate)
+            }
+
+            await this.prismaService.chatQueue.create({
+                data: { channel: channel, value: args.join(' '), userstate: userstate, status: MessageStatus.QUEUED }
+            })
+
+            this.gptHandler(channel)
+        }
+    }
+
+    private async gptHandler(channel: string): Promise<void> {
+        const message = await this.prismaService.chatQueue.findFirst({
+            where: { channel: channel, status: { not: MessageStatus.FINISHED } },
+            orderBy: { createdAt: 'asc' }
+        })
+        if (!message || message.status === MessageStatus.IN_PROGRESS) return
+
+        this.client.reply(channel, 'Отвечаю...', message.userstate as ChatUserstate)
+        await this.prismaService.chatQueue.update({ where: { id: message.id }, data: { status: MessageStatus.IN_PROGRESS } })
+
+        const apiKey = await this.prismaService.settings.findFirst({
+            where: { channel: { name: channel.slice(1) }, type: SettingType.OPEN_AI_AUTH_TOKEN }
+        })
+        if (!apiKey) {
+            this.client.reply(channel, 'Не указан API ключ', message.userstate as ChatUserstate)
+            await this.prismaService.chatQueue.deleteMany({ where: { channel: channel } })
             return
+        }
+
+        const response = await this.commandsService.gpt({
+            question: message.value,
+            key: apiKey?.value,
+            channel: channel,
+            username: (message.userstate as ChatUserstate)?.username
+        })
+        for (const part of response.match(/([\s\S]{1,500}(\s|$))\s*/g) ?? []) {
+            this.client.reply(channel, part, message.userstate as ChatUserstate)
+        }
+
+        await this.prismaService.chatQueue.update({
+            where: { id: message.id },
+            data: { response: response, status: MessageStatus.FINISHED }
+        })
+        const queueLength = await this.prismaService.chatQueue.count({
+            where: { channel: channel, status: { not: MessageStatus.FINISHED } }
+        })
+        if (queueLength > 0) {
+            return this.gptHandler(channel)
         }
     }
 }
