@@ -9,10 +9,12 @@ datasource db {
 }
 
 model User {
-    id       String   @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
-    name     String   @unique @map("user_name")
-    password String   @map("password") @db.Char(60)
+    id       String @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+    name     String @unique @map("user_name")
+    password String @map("password") @db.Char(60)
+
     channel  Channel?
+    settings Settings[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -21,14 +23,28 @@ model User {
 }
 
 model Channel {
-    id       String  @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
-    user     User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId   String  @unique @map("user_id") @db.Uuid
-    name     String  @unique @map("channel_name")
-    disabled Boolean @default(false) @map("disabled")
+    id      String  @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
+    user    User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    userId  String  @unique @map("user_id") @db.Uuid
+    name    String  @unique @map("channel_name")
+    enabled Boolean @default(true) @map("enabled")
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
     @@map("channels")
+}
+
+model Settings {
+    user   User?       @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    userId String      @map("user_id") @db.Uuid
+    type   SettingType @map("type")
+    value  String      @map("value")
+
+    @@unique([userId, type])
+    @@map("users_settings")
+}
+
+enum SettingType {
+    OPEN_AI_AUTH_TOKEN
 }
