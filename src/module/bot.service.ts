@@ -133,10 +133,10 @@ export class BotService implements OnModuleInit {
         await this.prismaService.chatQueue.update({ where: { id: message.id }, data: { status: MessageStatus.IN_PROGRESS } })
 
         const apiKey = await this.prismaService.settings.findFirst({
-            where: { channel: { name: channel.slice(1) }, type: SettingType.OPEN_AI_AUTH_TOKEN }
+            where: { channel: { name: channel.slice(1) }, type: SettingType.OPEN_AI_API_KEY }
         })
         if (!apiKey) {
-            this.client.reply(channel, 'Для этого канала не указан API ключ', message.userstate as ChatUserstate)
+            this.client.reply(channel, 'Для этого канала не указан OpenAI API ключ', message.userstate as ChatUserstate)
             await this.prismaService.chatQueue.deleteMany({ where: { channel: channel } })
             return
         }

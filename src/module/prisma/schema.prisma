@@ -59,7 +59,7 @@ model ChatHistoryMessage {
 }
 
 enum SettingType {
-    OPEN_AI_AUTH_TOKEN
+    OPEN_AI_API_KEY
     STREAM_DJ_CHANNEL_ID
     STREAM_DJ_LINK
 }
