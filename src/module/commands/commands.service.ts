@@ -7,6 +7,7 @@ import querystring from 'querystring'
 import seedrandom from 'seedrandom'
 import { VM } from 'vm2'
 import youtubeSearch, { Video } from 'ytsr'
+import { ChatRole } from '../prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 
 function randInt(min: number, max: number) {
@@ -49,6 +50,52 @@ export class CommandsService {
         } catch (e) {
             return `Ошибка: ${e.message}`
         }
+    }
+
+    async gpt(options: { question: string; key: string; channel?: string; username?: string }): Promise<string> {
+        const openai = new OpenAIApi(new Configuration({ apiKey: options.key }))
+        try {
+            const messagesHistory = options.username
+                ? await this.prismaService.chatHistoryMessage.findMany({
+                      where: { channel: options.channel, username: options.username }
+                  })
+                : []
+
+            const { data: response } = await openai.createChatCompletion({
+                model: 'gpt-3.5-turbo',
+                temperature: 0.3,
+                messages: [
+                    ...messagesHistory.map((message) => ({ role: message.role, content: message.value })),
+                    { role: 'user', content: options.question }
+                ]
+            })
+
+            const message = response.choices.at(0)?.message?.content ?? ''
+
+            if (options.channel && options.username) {
+                await this.prismaService.chatHistoryMessage.createMany({
+                    data: [
+                        { channel: options.channel, username: options.username, role: ChatRole.user, value: options.question },
+                        { channel: options.channel, username: options.username, role: ChatRole.assistant, value: message }
+                    ]
+                })
+            }
+
+            return message
+        } catch (e) {
+            console.error(e)
+            return `Ошибка: ${e.response?.data?.error?.message ?? e.message}`
+        }
+    }
+
+    async gptClearHistory(options: { channel: string; username: string }) {
+        const messagesHistory = await this.prismaService.chatHistoryMessage.deleteMany({
+            where: { channel: options.channel, username: options.username }
+        })
+        if (!messagesHistory.count) {
+            return 'История уже пуста'
+        }
+        return 'История очищена'
     }
 
     async dj(options: {
@@ -113,20 +160,5 @@ export class CommandsService {
         }
 
         return 'Неизвестная команда'
-    }
-
-    async gpt(options: { question: string; key: string }): Promise<string> {
-        const openai = new OpenAIApi(new Configuration({ apiKey: options.key }))
-        try {
-            const response = await openai.createChatCompletion({
-                model: 'gpt-3.5-turbo',
-                temperature: 0.3,
-                messages: [{ role: 'user', content: options.question }]
-            })
-            return response.data.choices.at(0)?.message?.content ?? ''
-        } catch (e) {
-            console.error(e)
-            return `Ошибка: ${e.response?.data?.error?.message ?? e.message}`
-        }
     }
 }
