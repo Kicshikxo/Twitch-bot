@@ -117,7 +117,7 @@ export class CommandsController {
     })
     @ApiQuery({
         name: 'key',
-        description: 'OpenAI API Key',
+        description: 'OpenAI API key',
         type: String,
         required: true,
         example: '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'
