@@ -40,7 +40,7 @@ export class BotService implements OnModuleInit {
     }
 
     private async joinHandler(channel: string, username: string, self: boolean) {
-        if (self) return
+        if (!self) return
         await this.prismaService.chatQueue.updateMany({
             where: { status: MessageStatus.IN_PROGRESS },
             data: { status: MessageStatus.FINISHED }
