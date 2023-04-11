@@ -30,7 +30,7 @@ export class BotService implements OnModuleInit {
                 username: this.configService.get('TWITCH_BOT_USERNAME'),
                 password: this.configService.get('TWITCH_BOT_OAUTH_TOKEN')
             },
-            channels: (await this.prismaService.channel.findMany()).map((channel) => channel.name)
+            channels: (await this.prismaService.channel.findMany({ where: { disabled: false } })).map((channel) => channel.name)
         })
     }
 
