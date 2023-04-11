@@ -34,7 +34,7 @@
         "rxjs": "^7.8.0",
         "seedrandom": "^3.0.5",
         "tmi.js-reply-fork": "^1.8.5",
-        "vm2": "^3.9.15",
+        "vm2": "^3.9.16",
         "ytsr": "^3.8.1"
     },
     "devDependencies": {
