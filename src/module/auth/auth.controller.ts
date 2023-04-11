@@ -18,13 +18,13 @@ export class AuthController {
     @Post('login')
     @ApiOperation({ summary: 'Получение токена аутентификации' })
     @ApiCreatedResponse({
-        description: 'Токен аутентификации'
+        description: 'Успешно: токен аутентификации'
     })
     @ApiBadRequestResponse({
-        description: 'Не указан логин или пароль'
+        description: 'Ошибка: не указан логин или пароль'
     })
     @ApiUnauthorizedResponse({
-        description: 'Неверные данные для входа'
+        description: 'Ошибка: неверные данные для входа'
     })
     @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({

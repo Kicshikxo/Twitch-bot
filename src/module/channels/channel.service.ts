@@ -14,7 +14,7 @@ export class ChannelService {
     }
 
     async setOpenOpenAiApiKey(options: { channelId: string; key: string }) {
-        await this.prismaService.settings.upsert({
+        return await this.prismaService.settings.upsert({
             where: {
                 channelId_type: {
                     channelId: options.channelId,
@@ -31,6 +31,5 @@ export class ChannelService {
                 type: SettingType.OPEN_AI_API_KEY
             }
         })
-        return 'Ключ успешно установлен'
     }
 }

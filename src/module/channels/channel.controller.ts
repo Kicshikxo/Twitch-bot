@@ -53,10 +53,6 @@ export class ChannelController {
     @Post('set-openai-api-key')
     @ApiOperation({ summary: 'Добавить/обновить OpenAI API ключ для канала' })
     @ApiCreatedResponse({
-        schema: {
-            type: 'string',
-            example: 'Ключ успешно установлен'
-        },
         description: 'Успех: канал успешно установлен'
     })
     @ApiBadRequestResponse({
