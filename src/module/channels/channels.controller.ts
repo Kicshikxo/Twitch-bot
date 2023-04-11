@@ -28,18 +28,10 @@ export class ChannelsController {
         description: 'Успех: канал успешно добавлен'
     })
     @ApiBadRequestResponse({
-        schema: {
-            type: 'string',
-            example: 'Не указано название канала'
-        },
         description: 'Ошибка: не указано название канала'
     })
     @ApiInternalServerErrorResponse({
-        schema: {
-            type: 'string',
-            example: 'Ошибка добавления канала'
-        },
-        description: 'Ошибка: ошибка добавления канала'
+        description: 'Ошибка: не удалось добавить канал'
     })
     @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
@@ -70,18 +62,10 @@ export class ChannelsController {
         description: 'Успех: канал успешно удалён'
     })
     @ApiBadRequestResponse({
-        schema: {
-            type: 'string',
-            example: 'Не указано название канала'
-        },
         description: 'Ошибка: не указано название канала'
     })
     @ApiInternalServerErrorResponse({
-        schema: {
-            type: 'string',
-            example: 'Ошибка удаления канала'
-        },
-        description: 'Ошибка: ошибка удаления канала'
+        description: 'Ошибка: не удалось удалить канал'
     })
     @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
