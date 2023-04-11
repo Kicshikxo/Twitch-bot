@@ -40,7 +40,7 @@ export class BotService implements OnModuleInit {
     }
 
     private async joinHandler(channel: string, username: string, self: boolean) {
-        if (self && this.configService.get('NODE_ENV') === 'production') this.client.say(channel, 'peepoHey')
+        if (self) return
         await this.prismaService.chatQueue.updateMany({
             where: { status: MessageStatus.IN_PROGRESS },
             data: { status: MessageStatus.FINISHED }
@@ -112,7 +112,7 @@ export class BotService implements OnModuleInit {
             where: { channel: { name: channel.slice(1) }, type: SettingType.OPEN_AI_AUTH_TOKEN }
         })
         if (!apiKey) {
-            this.client.reply(channel, 'Не указан API ключ', message.userstate as ChatUserstate)
+            this.client.reply(channel, 'Для этого канала не указан API ключ', message.userstate as ChatUserstate)
             await this.prismaService.chatQueue.deleteMany({ where: { channel: channel } })
             return
         }
