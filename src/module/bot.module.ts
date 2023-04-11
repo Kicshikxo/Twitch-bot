@@ -6,10 +6,8 @@ import { AuthController } from './auth/auth.controller'
 import { AuthMiddleware } from './auth/auth.middleware'
 import { AuthService } from './auth/auth.service'
 import { BotService } from './bot.service'
-import { ChannelConfigController } from './channelConfig/channelConfig.controller'
-import { ChannelConfigService } from './channelConfig/channelConfig.service'
-import { ChannelsController } from './channels/channels.controller'
-import { ChannelsService } from './channels/channels.service'
+import { ChannelController } from './channels/channel.controller'
+import { ChannelService } from './channels/channel.service'
 import { CommandsController } from './commands/commands.controller'
 import { CommandsService } from './commands/commands.service'
 import { PrismaService } from './prisma/prisma.service'
@@ -26,11 +24,11 @@ import { PrismaService } from './prisma/prisma.service'
         }),
         ConfigModule.forRoot()
     ],
-    controllers: [AuthController, ChannelsController, ChannelConfigController, CommandsController],
-    providers: [BotService, AuthService, ChannelsService, ChannelConfigService, CommandsService, PrismaService, ConfigService]
+    controllers: [AuthController, ChannelController, CommandsController],
+    providers: [BotService, AuthService, ChannelService, CommandsService, PrismaService, ConfigService]
 })
 export class BotModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(AuthMiddleware).forRoutes(ChannelsController, ChannelConfigController)
+        consumer.apply(AuthMiddleware).forRoutes(ChannelController)
     }
 }

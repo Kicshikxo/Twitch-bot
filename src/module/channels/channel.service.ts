@@ -3,8 +3,15 @@ import { SettingType } from '../prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
-export class ChannelConfigService {
+export class ChannelService {
     constructor(private readonly prismaService: PrismaService) {}
+
+    async renameChannel(options: { channelId: string; channelName: string }) {
+        return await this.prismaService.channel.update({
+            where: { id: options.channelId },
+            data: { name: options.channelName }
+        })
+    }
 
     async setOpenOpenAiApiKey(options: { channelId: string; key: string }) {
         await this.prismaService.settings.upsert({
