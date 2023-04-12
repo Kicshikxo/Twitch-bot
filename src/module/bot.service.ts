@@ -42,7 +42,7 @@ export class BotService implements OnModuleInit {
     private async joinHandler(channel: string, username: string, self: boolean) {
         if (!self) return
         await this.prismaService.chatQueue.updateMany({
-            where: { status: MessageStatus.IN_PROGRESS },
+            where: { channel: channel, status: MessageStatus.IN_PROGRESS },
             data: { status: MessageStatus.FINISHED }
         })
         this.gptHandler(channel)
@@ -129,17 +129,20 @@ export class BotService implements OnModuleInit {
         })
         if (!message || message.status === MessageStatus.IN_PROGRESS) return
 
-        this.client.reply(channel, 'Отвечаю...', message.userstate as ChatUserstate)
-        await this.prismaService.chatQueue.update({ where: { id: message.id }, data: { status: MessageStatus.IN_PROGRESS } })
-
         const apiKey = await this.prismaService.config.findFirst({
             where: { channel: { name: channel.slice(1) }, type: ConfigType.OPEN_AI_API_KEY }
         })
         if (!apiKey) {
             this.client.reply(channel, 'Для этого канала не указан OpenAI API ключ', message.userstate as ChatUserstate)
-            await this.prismaService.chatQueue.deleteMany({ where: { channel: channel } })
+            await this.prismaService.chatQueue.updateMany({
+                where: { channel: channel },
+                data: { status: MessageStatus.FINISHED }
+            })
             return
         }
+
+        this.client.reply(channel, 'Отвечаю...', message.userstate as ChatUserstate)
+        await this.prismaService.chatQueue.update({ where: { id: message.id }, data: { status: MessageStatus.IN_PROGRESS } })
 
         const response = await this.commandsService.gpt({
             question: message.value,
