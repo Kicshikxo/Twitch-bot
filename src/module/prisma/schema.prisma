@@ -9,11 +9,11 @@ datasource db {
 }
 
 model Channel {
-    id       String     @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
-    name     String     @unique @map("channel_name")
-    password String     @map("password") @db.Char(60)
-    enabled  Boolean    @default(true) @map("enabled")
-    settings Settings[]
+    id       String   @id @default(dbgenerated("gen_random_uuid()")) @map("channel_id") @db.Uuid
+    name     String   @unique @map("channel_name")
+    password String   @map("password") @db.Char(60)
+    enabled  Boolean  @default(true) @map("enabled")
+    configs  Config[]
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -21,14 +21,14 @@ model Channel {
     @@map("channels")
 }
 
-model Settings {
-    channel   Channel     @relation(fields: [channelId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    channelId String      @map("channel_id") @db.Uuid
-    type      SettingType @map("type")
-    value     String      @map("value")
+model Config {
+    channel   Channel    @relation(fields: [channelId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    channelId String     @map("channel_id") @db.Uuid
+    type      ConfigType @map("type")
+    value     String     @map("value")
 
     @@unique([channelId, type])
-    @@map("channels_settings")
+    @@map("channels_configs")
 }
 
 model ChatQueue {
@@ -58,7 +58,7 @@ model ChatHistoryMessage {
     @@map("chat_history")
 }
 
-enum SettingType {
+enum ConfigType {
     OPEN_AI_API_KEY
     STREAM_DJ_CHANNEL_ID
     STREAM_DJ_LINK

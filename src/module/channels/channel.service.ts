@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BotService } from '../bot.service'
-import { SettingType } from '../prisma/client'
+import { ConfigType } from '../prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
@@ -17,21 +17,21 @@ export class ChannelService {
     }
 
     async setOpenOpenAiApiKey(options: { channelId: string; key: string }) {
-        const response = await this.prismaService.settings.upsert({
+        const response = await this.prismaService.config.upsert({
             where: {
                 channelId_type: {
                     channelId: options.channelId,
-                    type: SettingType.OPEN_AI_API_KEY
+                    type: ConfigType.OPEN_AI_API_KEY
                 }
             },
             create: {
                 channelId: options.channelId,
                 value: options.key,
-                type: SettingType.OPEN_AI_API_KEY
+                type: ConfigType.OPEN_AI_API_KEY
             },
             update: {
                 value: options.key,
-                type: SettingType.OPEN_AI_API_KEY
+                type: ConfigType.OPEN_AI_API_KEY
             }
         })
         await this.botService.onModuleInit()

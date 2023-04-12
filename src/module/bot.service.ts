@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import tmi, { ChatUserstate, Client } from 'tmi.js-reply-fork'
 import { CommandsService } from './commands/commands.service'
-import { MessageStatus, SettingType } from './prisma/client'
+import { ConfigType, MessageStatus } from './prisma/client'
 import { PrismaService } from './prisma/prisma.service'
 
 @Injectable()
@@ -97,15 +97,15 @@ export class BotService implements OnModuleInit {
             return this.gptHandler(channel)
         }
         if (command === 'dj') {
-            const channelId = await this.prismaService.settings.findFirst({
-                where: { channel: { name: channel.slice(1) }, type: SettingType.STREAM_DJ_CHANNEL_ID }
+            const channelId = await this.prismaService.config.findFirst({
+                where: { channel: { name: channel.slice(1) }, type: ConfigType.STREAM_DJ_CHANNEL_ID }
             })
             if (!channelId) {
                 return this.client.reply(channel, 'Для этого канала не указан ID канала на StreamDJ', userstate)
             }
 
-            const djLink = await this.prismaService.settings.findFirst({
-                where: { channel: { name: channel.slice(1) }, type: SettingType.STREAM_DJ_LINK }
+            const djLink = await this.prismaService.config.findFirst({
+                where: { channel: { name: channel.slice(1) }, type: ConfigType.STREAM_DJ_LINK }
             })
 
             return this.client.reply(
@@ -132,8 +132,8 @@ export class BotService implements OnModuleInit {
         this.client.reply(channel, 'Отвечаю...', message.userstate as ChatUserstate)
         await this.prismaService.chatQueue.update({ where: { id: message.id }, data: { status: MessageStatus.IN_PROGRESS } })
 
-        const apiKey = await this.prismaService.settings.findFirst({
-            where: { channel: { name: channel.slice(1) }, type: SettingType.OPEN_AI_API_KEY }
+        const apiKey = await this.prismaService.config.findFirst({
+            where: { channel: { name: channel.slice(1) }, type: ConfigType.OPEN_AI_API_KEY }
         })
         if (!apiKey) {
             this.client.reply(channel, 'Для этого канала не указан OpenAI API ключ', message.userstate as ChatUserstate)
