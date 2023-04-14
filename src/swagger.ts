@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { BotModule } from './module/bot.module'
+import { BotModule } from './bot.module'
 
 export const createDocument = (app: INestApplication) => {
     const options = new DocumentBuilder()

@@ -7,15 +7,15 @@
     "author": "Kicshikxo",
     "scripts": {
         "build": "nest build",
+        "db:deploy": "npm run db:generate && npm run db:push",
+        "db:generate": "prisma generate --schema src/module/prisma/schema.prisma",
+        "db:push": "prisma db push --schema src/module/prisma/schema.prisma",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
         "start": "nest start",
         "start:debug": "nest start --debug --watch",
         "start:dev": "nest start --watch",
-        "start:prod": "node dist/main",
-        "db:generate": "prisma generate --schema src/module/prisma/schema.prisma",
-        "db:push": "prisma db push --schema src/module/prisma/schema.prisma",
-        "db:deploy": "npm run db:generate && npm run db:push"
+        "start:prod": "node dist/main"
     },
     "dependencies": {
         "@nestjs/axios": "^2.0.0",
