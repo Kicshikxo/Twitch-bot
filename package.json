@@ -35,10 +35,10 @@
         "seedrandom": "^3.0.5",
         "tmi.js-reply-fork": "^1.8.5",
         "vm2": "^3.9.16",
-        "ytsr": "^3.8.1"
+        "ytsr": "^3.8.2"
     },
     "devDependencies": {
-        "@nestjs/cli": "^9.3.0",
+        "@nestjs/cli": "^9.4.0",
         "@nestjs/schematics": "^9.1.0",
         "@nestjs/testing": "^9.4.0",
         "@types/bcrypt": "^5.0.0",
