@@ -25,6 +25,7 @@
         "@nestjs/jwt": "^10.0.3",
         "@nestjs/platform-express": "^9.4.0",
         "@nestjs/swagger": "^6.3.0",
+        "@prisma/client": "^4.12.0",
         "bcrypt": "^5.1.0",
         "crc": "^4.3.2",
         "openai": "^3.2.1",
