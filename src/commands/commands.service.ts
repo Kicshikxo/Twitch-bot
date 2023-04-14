@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import isUrl from 'is-url'
 import { Configuration, OpenAIApi } from 'openai'
 import querystring from 'querystring'
 import seedrandom from 'seedrandom'
@@ -135,9 +134,13 @@ export class CommandsService {
         if (['add'].includes(options.command)) {
             if (!options.query?.trim()) return 'Не указано название трека или ютуб ссылка'
 
-            const videoLink = isUrl(options.query)
-                ? options.query
-                : ((await youtubeSearch(`${options.query} Official Music Video`, { limit: 1 })).items.at(0) as Video).url
+            let videoLink: string
+            try {
+                videoLink = new URL(options.query).href
+            } catch (e) {
+                const { items: videos } = await youtubeSearch(`${options.query} Official Music Video`, { limit: 1 })
+                videoLink = (videos.at(0) as Video).url
+            }
 
             const { data: response } = await this.httpService.axiosRef.post(
                 `https://streamdj.app/includes/back.php?func=add_track&channel=${options.channelId}`,
