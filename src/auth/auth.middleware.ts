@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common'
-import { crc32 } from 'crc'
+import crc32 from 'crc/crc32'
 import { Request, Response } from 'express'
 import { PrismaService } from '../prisma/prisma.service'
 import { AuthService } from './auth.service'

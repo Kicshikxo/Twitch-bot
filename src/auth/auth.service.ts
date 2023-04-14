@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compareSync } from 'bcrypt'
-import { crc32 } from 'crc'
+import crc32 from 'crc/crc32'
 import { PrismaService } from '../prisma/prisma.service'
 import { TokenDataDto } from './dto/token.data.dto'
 
