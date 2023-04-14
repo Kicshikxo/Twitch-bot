@@ -47,7 +47,7 @@ export class ChannelController {
     createChannel(@Req() request: Request, @Body('channelName') channelName: string) {
         if (!channelName) throw new BadRequestException('Обязательный параметр channelName не указан')
 
-        return this.channelService.renameChannel({ channelId: request.tokenData?.id ?? '', channelName })
+        return this.channelService.renameChannel({ channelId: request.channelTokenData?.id ?? '', channelName })
     }
 
     @Post('set-openai-api-key')
@@ -79,6 +79,6 @@ export class ChannelController {
     async setOpenOpenAiApiKey(@Req() request: Request, @Body('key') key: string) {
         if (!key) throw new BadRequestException('Обязательный параметр key не указан')
 
-        return await this.channelService.setOpenOpenAiApiKey({ channelId: request.tokenData?.id ?? '', key })
+        return await this.channelService.setOpenOpenAiApiKey({ channelId: request.channelTokenData?.id ?? '', key })
     }
 }
