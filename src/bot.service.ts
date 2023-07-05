@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import tmi, { ChatUserstate, Client } from 'tmi.js-reply-fork'
+import { ChannelService } from './channels/channel.service'
 import { CommandsService } from './commands/commands.service'
 import { ConfigType, MessageStatus } from './prisma/client'
 import { PrismaService } from './prisma/prisma.service'
@@ -10,6 +11,7 @@ export class BotService implements OnModuleInit {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly configService: ConfigService,
+        private readonly channelService: ChannelService,
         private readonly commandsService: CommandsService
     ) {}
 
@@ -62,6 +64,40 @@ export class BotService implements OnModuleInit {
         if (command === 'calc') {
             return this.client.reply(channel, this.commandsService.calc({ expression: args.join(' ') }), userstate)
         }
+        if (command === 'config') {
+            if (!userstate.badges?.broadcaster) return
+
+            const { id: channelId } = (await this.prismaService.channel.findUnique({ where: { name: channel.slice(1) } })) ?? {}
+            if (!channelId) return
+
+            const configType = args.at(0)
+            if (configType === ConfigType.OPEN_AI_API_KEY) {
+                return this.client.reply(
+                    channel,
+                    await this.channelService.setOpenOpenAiApiKey({ channelId, key: args.at(1) }),
+                    userstate
+                )
+            }
+            if (configType === ConfigType.STREAM_DJ_ID) {
+                return this.client.reply(
+                    channel,
+                    await this.channelService.setStreamDjChannelId({ channelId, id: args.at(1) }),
+                    userstate
+                )
+            }
+            if (configType === ConfigType.STREAM_DJ_LINK) {
+                return this.client.reply(
+                    channel,
+                    await this.channelService.setStreamDjLink({ channelId, link: args.at(1) }),
+                    userstate
+                )
+            }
+            return this.client.reply(
+                channel,
+                `Доступные конфигурационные опции: ${Object.keys(ConfigType).join(', ')}`,
+                userstate
+            )
+        }
         if (command === 'gpt') {
             if (args.at(0) === 'clear' && userstate.username) {
                 return this.client.reply(
@@ -98,10 +134,10 @@ export class BotService implements OnModuleInit {
         }
         if (command === 'dj') {
             const channelId = await this.prismaService.config.findFirst({
-                where: { channel: { name: channel.slice(1) }, type: ConfigType.STREAM_DJ_CHANNEL_ID }
+                where: { channel: { name: channel.slice(1) }, type: ConfigType.STREAM_DJ_ID }
             })
             if (!channelId) {
-                return this.client.reply(channel, 'Для этого канала не указан ID канала на StreamDJ', userstate)
+                return this.client.reply(channel, 'Для этого канала не указан идентификатор StreamDJ', userstate)
             }
 
             const djLink = await this.prismaService.config.findFirst({

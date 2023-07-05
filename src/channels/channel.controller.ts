@@ -51,15 +51,15 @@ export class ChannelController {
     }
 
     @Post('set-openai-api-key')
-    @ApiOperation({ summary: 'Добавить/обновить OpenAI API ключ для канала' })
+    @ApiOperation({ summary: 'Установить OpenAI API ключ для канала' })
     @ApiCreatedResponse({
-        description: 'Успех: канал успешно установлен'
+        description: 'Успех: ключ успешно установлен'
     })
     @ApiBadRequestResponse({
         description: 'Ошибка: не указан ключ'
     })
     @ApiInternalServerErrorResponse({
-        description: 'Ошибка: не удалось добавить/обновить ключ'
+        description: 'Ошибка: не удалось установить ключ'
     })
     @ApiConsumes('application/x-www-form-urlencoded')
     @ApiBody({
@@ -80,5 +80,69 @@ export class ChannelController {
         if (!key) throw new BadRequestException('Обязательный параметр key не указан')
 
         return await this.channelService.setOpenOpenAiApiKey({ channelId: request.channelTokenData?.id ?? '', key })
+    }
+
+    @Post('set-stream-dj-id')
+    @ApiOperation({ summary: 'Установить идентификатор StreamDJ для канала' })
+    @ApiCreatedResponse({
+        description: 'Успех: идентификатор StreamDJ успешно установлен'
+    })
+    @ApiBadRequestResponse({
+        description: 'Ошибка: не указан идентификатор'
+    })
+    @ApiInternalServerErrorResponse({
+        description: 'Ошибка: не удалось установить идентификатор'
+    })
+    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                id: {
+                    type: 'number',
+                    description: 'StreamDJ id',
+                    example: '000000'
+                }
+            },
+            required: ['id']
+        },
+        required: true
+    })
+    async setStreamDjChannelId(@Req() request: Request, @Body('id') id: string) {
+        if (!id) throw new BadRequestException('Обязательный параметр id не указан')
+
+        return await this.channelService.setStreamDjChannelId({ channelId: request.channelTokenData?.id ?? '', id })
+    }
+
+    @Post('set-stream-dj-link')
+    @ApiOperation({ summary: 'Установить ссылку на StreamDJ для канала' })
+    @ApiCreatedResponse({
+        description: 'Успех: ссылка на StreamDJ успешно установлена'
+    })
+    @ApiBadRequestResponse({
+        description: 'Ошибка: не указана ссылка'
+    })
+    @ApiInternalServerErrorResponse({
+        description: 'Ошибка: не удалось установить ссылку'
+    })
+    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                link: {
+                    type: 'string',
+                    description: 'StreamDJ link',
+                    example: 'https://streamdj.app/c/example_channel'
+                }
+            },
+            required: ['link']
+        },
+        required: true
+    })
+    async setStreamDjLink(@Req() request: Request, @Body('link') link: string) {
+        if (!link) throw new BadRequestException('Обязательный параметр link не указан')
+
+        return await this.channelService.setStreamDjLink({ channelId: request.channelTokenData?.id ?? '', link })
     }
 }
